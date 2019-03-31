@@ -1,0 +1,530 @@
+package library;
+
+import java.text.ParseException;
+
+public interface LibraryInterface {
+	// public void showFine(int days);
+	   public void issue() throws ParseException;
+	   public void returnBook();
+	   public void viewPreviousLogs();
+	    //public void display();
+	    public void search();
+	   // public void payfine();
+	    public void addbook();
+
+}
+--------------------------------------------------------------------------
+
+package lib2;
+import library.LibraryInterface;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Scanner;
+
+
+
+public class Implclass implements  LibraryInterface {
+	Scanner sc=new Scanner(System.in);
+	//BookDetails bd=new BookDetails();
+	User user=new User();
+	BookIssued bi1=new BookIssued();
+	List<BookDetails> book= new ArrayList<BookDetails>();
+	HashMap<User,List<BookIssued>> map=new HashMap<User,List<BookIssued>>();
+
+	@Override
+	public void issue() {
+		System.out.println("in issue");
+		int count=0;
+		String a;
+		System.out.println("Enter your name");
+		String name_user=sc.next();
+		System.out.println("Enter your id");
+		int user_id= sc.nextInt();
+		System.out.println("Enter your dept");
+		String dept=sc.next();
+		user.setName(name_user);
+		user.setId(user_id);
+		user.setDept(dept);
+
+		List<BookIssued> bukisud=new ArrayList<BookIssued>();
+		System.out.println("Enter the Date ");
+		String date = sc.next();
+		SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
+		Date date2=null;
+		try {
+			date2 = dateFormat.parse(date);
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+		System.out.println("\n"+date2);
+		//bi.setDate(date2);
+		do {
+			count++;
+			System.out.println("enter the name of book");
+			String book_issue=sc.next();
+			System.out.println("enter book id");
+			int issue_id_book=sc.nextInt();
+			
+			BookIssued bi=new BookIssued();
+			bi.setBookID(issue_id_book);
+			bi.setBookName(book_issue);
+			bi.setDate(date2);
+			bukisud.add(bi);
+
+			System.out.println("\ndo you want to add more books(yes/no)");
+			a= sc.next();	
+		}while(a.equals("yes"));
+		//int num_books_issued=bi1.getCount();
+		System.out.println("\nnumber of books issued= "+count);
+		
+//		for(int i=0;i<bukisud.size();i++)
+//		{
+//			BookIssued bi=bukisud.get(i);
+//			System.out.println(i+". "+ bi.getBookID()+" , "+bi.getBookName());
+//		}
+
+		map.put(user,bukisud);
+	}
+
+	@Override
+	public void returnBook() {
+		System.out.println("in return");
+
+		System.out.println("enter user id");
+		int userid=sc.nextInt();
+		System.out.println("enter book id");
+		int bookid=sc.nextInt();
+
+		for(User key:map.keySet())//every key of map ie object of user
+		{
+			if(userid==key.getId())//finding that if of user
+			{
+				List<BookIssued> list=map.get(key);//list of books of that object
+				for (BookIssued b : list)//going through all the books
+				{
+					if(bookid==b.getBookID())
+					{
+						map.get(key).remove(b);
+						Date issueDate = b.getDate();
+						Date todayDate = new Date();
+
+						long diff = todayDate.getTime() - issueDate.getTime();
+
+						long diffDays = diff / (24 * 60 * 60 * 1000);
+
+						if (diffDays > 10) {
+							int fine = (int) (diffDays - 10);
+							fine = fine * 10;
+							System.out.println("Total Fine " + fine + " Rs.");
+						}
+					}
+					
+				}
+			}
+		}
+
+
+	}
+
+	@Override
+	public void viewPreviousLogs() {
+		System.out.println("in view pewv logs");
+
+		System.out.println("enter user id ");
+		int id=sc.nextInt();
+		for(User key:map.keySet())
+		{
+			if(id==key.getId())
+			{
+				System.out.println("gotuser");
+				List<BookIssued> bis=map.get(key);
+				//System.out.println("size of list "+bis.size());
+				for(int i=0;i<bis.size();i++)
+				{
+					BookIssued bi=bis.get(i);
+					System.out.println(i+". "+ bi.getBookID()+" , "+bi.getBookName()+" , "+bi.getDate());
+				}
+				
+			}
+		}
+	}
+
+
+	public void search() {
+		System.out.println("in search");
+
+		System.out.println("enter bookid");
+		int bookid=sc.nextInt();
+		System.out.println("enter book name");
+		String bookName=sc.next();
+		boolean flag=false;
+		for(BookDetails value:book)
+		{
+			if((value.getBookID()==bookid) && value.getBookName().equalsIgnoreCase(bookName) && value.getNumOfcopies()>0)
+			{
+				flag=true;
+			}
+		}
+		if(flag==true)
+		{
+			System.out.println("available");
+		}
+		else
+		{
+			System.out.println("not available");
+		}
+	}
+
+
+
+	public void addbook() {
+		System.out.println("in addssssssssss");
+
+		System.out.println("enter bookid ");
+		int bookid=sc.nextInt();
+		System.out.println("enter bookname");
+		String bookName=sc.next();
+		System.out.println("enter number of copies ");
+		int numOfcopies=sc.nextInt();
+		BookDetails bd=new BookDetails();
+		bd.setBookID(bookid);
+		bd.setBookName(bookName);
+		bd.setNumOfcopies(numOfcopies);
+		book.add(bd);
+		System.out.println("you added "+bd.getBookID());
+		System.out.println("you added "+bd.getBookName());
+
+	}
+
+
+
+}
+
+-----------------------------------------------------------------------------
+
+package lib2;
+
+public class User {
+
+	private String name;
+    private  int id;
+    private String dept;
+	public String getName() {
+		return name;
+	}
+	public void setName(String name) {
+		this.name = name;
+	}
+	public int getId() {
+		return id;
+	}
+	public void setId(int id) {
+		this.id = id;
+	}
+	public String getDept() {
+		return dept;
+	}
+	public void setDept(String dept) {
+		this.dept = dept;
+	}
+    
+    
+
+}
+---------------------------------------------------------------
+
+package lib2;
+
+public class BookDetails {
+	private String bookName;
+	private int bookID;
+	private int numOfcopies=0;
+	public String getBookName() {
+		return bookName;
+	}
+	public void setBookName(String bookName) {
+		this.bookName = bookName;
+	}
+	public int getBookID() {
+		return bookID;
+	}
+	public void setBookID(int bookID) {
+		this.bookID = bookID;
+	}
+	public int getNumOfcopies() {
+		return numOfcopies;
+	}
+	public void setNumOfcopies(int numOfcopies) {
+		this.numOfcopies = numOfcopies;
+	}
+}
+---------------------------------------------------------
+package lib2;
+
+import java.util.Date;
+
+public class BookIssued {
+	private String bookName;
+	private int bookID;
+	private Date date;
+	private int count=0;
+	public int getCount() {
+		return count;
+	}
+//	public void setCount(int count) {
+//		this.count = count;
+//	}
+	public Date getDate() {
+		return date;
+	}
+	public void setDate(Date date) {
+		this.date = date;
+	}
+	public String getBookName() {
+		return bookName;
+	}
+	public void setBookName(String bookName) {
+		this.bookName = bookName;
+		count++;
+	}
+	public int getBookID() {
+		return bookID;
+	}
+	public void setBookID(int bookID) {
+		this.bookID = bookID;
+	}
+	
+	
+}
+------------------------------------------------------------
+
+package lib2;
+
+
+import java.util.Scanner;
+
+public class MainClass {
+	static Implclass imp=new Implclass();//if we dont write new Implclas then a null pointer exception will be thrown.
+	public static void main(String[] args) {
+			
+			System.out.println("enter your option\n1. add book\n2. issue a book\n3. view previous logs\n4. return a book\n5. search book");
+			System.out.println("enter 9 if you want to exit");
+			@SuppressWarnings("resource")
+			Scanner sc=new Scanner(System.in);
+			int num=sc.nextInt();
+			
+			do{
+			switch(num){
+			
+				case 1:
+					imp.addbook();
+					break;
+				case 2:
+					imp.issue();
+					break;
+				case 3:
+					imp.viewPreviousLogs(); //same as show issue details
+					break;
+				case 4:
+					imp.returnBook();
+					break;
+				
+				case 5:
+					imp.search(); //same as print book details
+					break;
+			}
+			//sc=new Scanner(System.in);
+			System.out.println("enter the number");
+			num=sc.nextInt();
+			}while(num!=0 && num<6);
+		}
+		
+}
+
+
+
+
+
+
+/*title
+-author
+-bookid
+-no_of_copies
+-status*/
+
+
+------------------------------------------------------------------------------
+
+package library1;
+
+public class Database {
+	private boolean status;
+	private String book_name;
+	private int bookid;
+	private String author;
+	private int edition;
+	public boolean findStatus(String book_name,String author,int edition)
+	{
+		
+		
+		return status;
+	}
+	public void update(boolean status,int bookid)
+	{
+		
+	}
+
+}
+
+//add book method
+----------------------------------------------------------------------------------
+OTHER CODE
+----------------------------------------------------------------------------------
+
+
+
+package employee;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
+
+public class Employee {
+	private static int empid;
+	private static String empname;
+	private static float empsal;
+	private static String empdesig; 
+
+	public static void main(String[] args) {
+		List<Employee> list=TakeInput();
+	     display(list);
+	     //array_of_employee();
+	}
+	public static List<Employee> TakeInput()
+	{
+	 		Scanner sc=new Scanner(System.in);
+			
+	 		int i;
+	 		
+	 		List<Employee> list=new ArrayList<Employee>();
+	 		for(i=0;i<2;i++)
+	 		{
+	 			System.out.println("enter the id");
+				 empid=sc.nextInt();
+				 
+				System.out.println("enter the name");
+				empname=sc.next();
+				
+				System.out.println("enter the salary");
+				empsal=sc.nextFloat();
+				System.out.println("enter the designation");
+				empdesig=sc.next();
+				Employee emp=new Employee(empid,empname,empsal,empdesig);
+				list.add(emp);
+				
+	 		}
+	 		sc.close();
+	 		return list;
+	 		
+	}
+	public static void display(List<Employee> list)
+	{
+	 		System.out.println(list);
+	}
+	public Employee(int id,String name,float sal,String desig)
+	{
+		this.empid=id;
+		this.empname=name;
+		
+		this.empsal=sal;
+		this.empdesig=desig;
+		
+	}
+	public static void array_of_employee()
+	{
+		Scanner sc= new Scanner(System.in);
+		int i;
+		Employee[]emp=new Employee[2];
+		//emp=new Employee[3];
+		for(i=0;i<2;i++)
+		{
+			
+		System.out.println("enter the id");
+		 empid=sc.nextInt();
+		System.out.println("enter the name");
+		empname=sc.next();
+		System.out.println("enter the designation");
+		 empdesig=sc.next();
+		System.out.println("enter the salary");
+		empsal=sc.nextFloat();
+		emp[i]=new Employee(empid,empname,empsal,empdesig);
+		
+		}
+		for(i=0;i<2;i++)
+		{
+			System.out.println(i);
+			emp[i].showAll();
+			
+		}
+	}
+	public  void showAll()
+	{
+		System.out.println("id is "+empid);
+		System.out.println("name is "+empname);
+		System.out.println("designation  is "+empdesig);
+		
+		System.out.println("old salary is "+empsal);
+		try{
+		empsal=updateSal(empsal);
+		}
+		catch(SalaryHike min)
+		{
+			System.out.println("exception");
+			System.out.println(min);
+		}
+		finally
+    	{
+    		System.out.println("new salary="+ empsal);
+    		System.out.println("---------------------------------");
+    	}
+    	
+		
+		
+		
+	}
+	public static float updateSal(float sal)throws SalaryHike
+	{
+		float new_sal;
+		new_sal=(float)(sal*(1.1));
+		if(new_sal<15000)
+	   	{
+	   		throw new SalaryHike((int)(new_sal));
+	   	}
+		else
+		{
+			System.out.println("HIke is ok");
+		}
+		
+		return new_sal;
+	}
+
+	
+}
+
+
+class SalaryHike extends Exception{
+	private int salary;
+	public SalaryHike(int sal)
+	{
+		salary=sal;
+	}
+	public String toString()
+	{
+		return "MinimumSalaryException " + salary;
+	}
+}
